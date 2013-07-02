@@ -19,6 +19,8 @@
 
 @implementation SAMWebView
 
+@synthesize shadowsHidden = _shadowsHidden;
+
 #pragma mark - NSObject
 
 - (void)dealloc {
@@ -201,18 +203,18 @@
 
 
 - (void)setShadowsHidden:(BOOL)hide {
-	if (self.shadowsHidden == hide) {
+	if (_shadowsHidden == hide) {
 		return;
 	}
 
-	self.shadowsHidden = hide;
+	_shadowsHidden = hide;
 
 	// Thanks @flyosity http://twitter.com/flyosity/status/17951035384
 	for (UIView *view in [self.webView subviews]) {
 		if ([view isKindOfClass:[UIScrollView class]]) {
 			for (UIView *innerView in [view subviews]) {
 				if ([innerView isKindOfClass:[UIImageView class]]) {
-					innerView.hidden = self.shadowsHidden;
+					innerView.hidden = _shadowsHidden;
 				}
 			}
 		}
