@@ -8,11 +8,9 @@
 
 #import "SAMWebViewController.h"
 
-@interface SAMWebViewController () {
-	UIActivityIndicatorView *_indicator;
-	UIBarButtonItem *_backBarButton;
-	UIBarButtonItem *_forwardBarButton;
-}
+#import <MessageUI/MessageUI.h>
+
+@interface SAMWebViewController () <UIActionSheetDelegate, MFMailComposeViewControllerDelegate>
 
 - (void)_updateBrowserUI;
 
@@ -24,7 +22,11 @@
 
 @end
 
-@implementation SAMWebViewController
+@implementation SAMWebViewController {
+	UIActivityIndicatorView *_indicator;
+	UIBarButtonItem *_backBarButton;
+	UIBarButtonItem *_forwardBarButton;
+}
 
 @synthesize webView = _webView;
 

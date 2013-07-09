@@ -8,9 +8,7 @@
 
 #import "SAMWebView.h"
 
-#import <MessageUI/MessageUI.h>
-
-@interface SAMWebViewController : UIViewController <SAMWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate>
+@interface SAMWebViewController : UIViewController <SAMWebViewDelegate>
 
 @property (nonatomic, assign) BOOL toolbarHidden;
 @property (nonatomic, readonly) SAMWebView *webView;
