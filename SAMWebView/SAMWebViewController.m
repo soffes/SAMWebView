@@ -242,16 +242,12 @@
 }
 
 
-- (void)webViewDidLoadDOM:(SAMWebView *)webView {
-	NSString *title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
+- (void)webViewDidFinishLoadingPage:(SAMWebView *)webView {
+	[self _updateBrowserUI];
+    NSString *title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
     if ([title length] > 0) {
         self.title = title;
     }
-}
-
-
-- (void)webViewDidFinishLoadingPage:(SAMWebView *)webView {
-	[self _updateBrowserUI];
 }
 
 
