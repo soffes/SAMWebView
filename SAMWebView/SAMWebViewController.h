@@ -12,7 +12,7 @@
 
 @interface SAMWebViewController : UIViewController <SAMWebViewDelegate, UIActionSheetDelegate, MFMailComposeViewControllerDelegate>
 
-@property (nonatomic, assign) BOOL showToolbar;
+@property (nonatomic, assign) BOOL toolbarHidden;
 @property (nonatomic, readonly) SAMWebView *webView;
 @property (nonatomic, readonly) NSURL *currentURL;
 

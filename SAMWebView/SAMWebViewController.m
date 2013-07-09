@@ -32,7 +32,7 @@
 
 - (id)init {
 	if ((self = [super init])) {
-        self.showToolbar = YES;
+        self.toolbarHidden = NO;
 	}
 	return self;
 }
@@ -107,7 +107,7 @@
 - (void)viewWillAppear:(BOOL)animated {
 	[super viewWillAppear:animated];
 
-    if (self.showToolbar && ![self.currentURL isFileURL]) {
+    if (!self.toolbarHidden && ![self.currentURL isFileURL]) {
         [self.navigationController setToolbarHidden:NO animated:animated];
     }
 }
@@ -116,7 +116,7 @@
 - (void)viewWillDisappear:(BOOL)animated {
 	[super viewWillDisappear:animated];
 
-    if (self.showToolbar) {
+    if (!self.toolbarHidden) {
         [self.navigationController setToolbarHidden:YES animated:animated];
     }
 }
@@ -236,7 +236,7 @@
 	self.title = URL.absoluteString;
 	[self _updateBrowserUI];
 
-	if (self.showToolbar) {
+	if (!self.toolbarHidden) {
 		[self.navigationController setToolbarHidden:[URL isFileURL] animated:YES];
 	}
 }
