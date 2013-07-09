@@ -1,4 +1,4 @@
-# SAMGradientView
+# SAMWebView
 
 This class pushes UIWebView to its limits and many common and usually difficult tasks very simple.
 
