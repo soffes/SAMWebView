@@ -12,23 +12,54 @@
 
 @interface SAMWebViewController () <UIActionSheetDelegate, MFMailComposeViewControllerDelegate>
 
-- (void)_updateBrowserUI;
-
-- (void)close:(id)sender;
-- (void)openSafari:(id)sender;
-- (void)openActionSheet:(id)sender;
-- (void)copyURL:(id)sender;
-- (void)emailURL:(id)sender;
+@property (nonatomic, readonly) UIActivityIndicatorView *indicatorView;
+@property (nonatomic, readonly) UIBarButtonItem *backBarButtonItem;
+@property (nonatomic, readonly) UIBarButtonItem *forwardBarButtonItem;
 
 @end
 
-@implementation SAMWebViewController {
-	UIActivityIndicatorView *_indicator;
-	UIBarButtonItem *_backBarButton;
-	UIBarButtonItem *_forwardBarButton;
-}
+@implementation SAMWebViewController
 
 @synthesize webView = _webView;
+@synthesize toolbarHidden = _toolbarHidden;
+@synthesize indicatorView = _indicatorView;
+@synthesize backBarButtonItem = _backBarButtonItem;
+@synthesize forwardBarButtonItem = _forwardBarButtonItem;
+
+- (UIActivityIndicatorView *)indicatorView {
+	if (!_indicatorView) {
+		_indicatorView = [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 22.0f, 22.0f)];
+		_indicatorView.hidesWhenStopped = YES;
+	}
+	return _indicatorView;
+}
+
+
+- (UIBarButtonItem *)backBarButtonItem {
+	if (!_backBarButtonItem) {
+		_backBarButtonItem = [[UIBarButtonItem alloc]
+						  initWithImage:[UIImage imageNamed:@"SAMWebView-back-button"]
+						  landscapeImagePhone:[UIImage imageNamed:@"SAMWebView-back-button-mini"]
+						  style:UIBarButtonItemStylePlain
+						  target:self.webView
+						  action:@selector(goBack)];
+	}
+	return _backBarButtonItem;
+}
+
+
+- (UIBarButtonItem *)forwardBarButtonItem {
+	if (!_forwardBarButtonItem) {
+		_forwardBarButtonItem = [[UIBarButtonItem alloc]
+								 initWithImage:[UIImage imageNamed:@"SAMWebView-forward-button"]
+								 landscapeImagePhone:[UIImage imageNamed:@"SAMWebView-forward-button-mini"]
+								 style:UIBarButtonItemStylePlain
+								 target:self.webView
+								 action:@selector(goForward)];
+	}
+	return _forwardBarButtonItem;
+}
+
 
 #pragma mark - NSObject
 
@@ -46,63 +77,50 @@
 	[super viewDidLoad];
 	
     // Loading indicator
-	_indicator = [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 22.0f, 22.0f)];
-	_indicator.hidesWhenStopped = YES;
-	self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:_indicator];
+	self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:self.indicatorView];
 	
     // Toolbar buttons
-	_backBarButton = [[UIBarButtonItem alloc]
-                      initWithImage:[UIImage imageNamed:@"back-button.png"]
-                      landscapeImagePhone:[UIImage imageNamed:@"back-button-mini.png"]
-                      style:UIBarButtonItemStylePlain
-                      target:_webView
-                      action:@selector(goBack)];
-	_forwardBarButton = [[UIBarButtonItem alloc]
-                         initWithImage:[UIImage imageNamed:@"forward-button.png"]
-                         landscapeImagePhone:[UIImage imageNamed:@"forward-button-mini.png"]
-                         style:UIBarButtonItemStylePlain
-                         target:_webView
-                         action:@selector(goForward)];
-	UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-    UIBarButtonItem *fixedSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
+	UIBarButtonItem *reloadBarButtonItem = [[UIBarButtonItem alloc]
+											initWithImage:[UIImage imageNamed:@"SAMWebView-reload-button"]
+											landscapeImagePhone:[UIImage imageNamed:@"SAMWebView-reload-button-mini"]
+											style:UIBarButtonItemStylePlain
+											target:self.webView
+											action:@selector(reload)];
+
+	UIBarButtonItem *safariBarButtonItem = [[UIBarButtonItem alloc]
+											initWithImage:[UIImage imageNamed:@"SAMWebView-safari-button"]
+											landscapeImagePhone:[UIImage imageNamed:@"SAMWebView-safari-button-mini"]
+											style:UIBarButtonItemStylePlain
+											target:self
+											action:@selector(openSafari:)];
+
+	UIBarButtonItem *actionSheetBarButtonItem = [[UIBarButtonItem alloc]
+												 initWithImage:[UIImage imageNamed:@"SAMWebView-action-button"]
+												 landscapeImagePhone:[UIImage imageNamed:@"SAMWebView-action-button-mini"]
+												 style:UIBarButtonItemStylePlain
+												 target:self
+												 action:@selector(openActionSheet:)];
+	
+	UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc]
+									  initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
+									  target:nil action:nil];
+
+    UIBarButtonItem *fixedSpace = [[UIBarButtonItem alloc]
+								   initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace
+								   target:nil action:nil];
     fixedSpace.width = 10.0;
-	self.toolbarItems = @[
-        fixedSpace,
-        _backBarButton,
-        flexibleSpace,
-        _forwardBarButton,
-        flexibleSpace,
-        [[UIBarButtonItem alloc]
-         initWithImage:[UIImage imageNamed:@"reload-button.png"]
-         landscapeImagePhone:[UIImage imageNamed:@"reload-button-mini.png"]
-         style:UIBarButtonItemStylePlain
-         target:_webView
-         action:@selector(reload)],
-        flexibleSpace,
-        [[UIBarButtonItem alloc]
-         initWithImage:[UIImage imageNamed:@"safari-button.png"]
-         landscapeImagePhone:[UIImage imageNamed:@"safari-button-mini.png"]
-         style:UIBarButtonItemStylePlain
-         target:self
-         action:@selector(openSafari:)],
-        flexibleSpace,
-        [[UIBarButtonItem alloc]
-         initWithImage:[UIImage imageNamed:@"action-button.png"]
-         landscapeImagePhone:[UIImage imageNamed:@"action-button-mini.png"]
-         style:UIBarButtonItemStylePlain
-         target:self
-         action:@selector(openActionSheet:)],
-        fixedSpace
-    ];
+
+	self.toolbarItems = @[fixedSpace, self.backBarButtonItem, flexibleSpace, self.forwardBarButtonItem, flexibleSpace,
+        reloadBarButtonItem, flexibleSpace, safariBarButtonItem, flexibleSpace, actionSheetBarButtonItem, fixedSpace];
 	
     // Close button
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
 		self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStyleBordered target:self action:@selector(close:)];
 	}
-    
+
     // Web view
-    self.webView.frame = self.view.bounds;
-    [self.view addSubview:self.webView];
+	self.webView.frame = self.view.bounds;
+	[self.view addSubview:self.webView];
 }
 
 
@@ -174,8 +192,11 @@
 	} else {
 		actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Copy URL", @"Email URL", nil];
 	}
+
+	if (self.navigationController) {
+		actionSheet.actionSheetStyle = (UIActionSheetStyle)self.navigationController.navigationBar.barStyle;
+	}
 	
-	actionSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
 	[actionSheet showInView:self.navigationController.view];
 }
 
@@ -193,7 +214,7 @@
 	MFMailComposeViewController *controller = [[MFMailComposeViewController alloc] init];
 	controller.subject = self.title;
 	controller.mailComposeDelegate = self;
-	[controller setMessageBody:_webView.lastRequest.mainDocumentURL.absoluteString isHTML:NO];
+	[controller setMessageBody:self.webView.lastRequest.mainDocumentURL.absoluteString isHTML:NO];
     
     [self presentViewController:controller animated:YES completion:nil];
 }
@@ -201,27 +222,27 @@
 
 #pragma mark - Private
 
-- (void)_updateBrowserUI {
-	_backBarButton.enabled = [_webView canGoBack];
-	_forwardBarButton.enabled = [_webView canGoForward];
+- (void)updateBrowserUI {
+	self.backBarButtonItem.enabled = [self.webView canGoBack];
+	self.forwardBarButtonItem.enabled = [self.webView canGoForward];
 
 	UIBarButtonItem *reloadButton = nil;
 	
-	if ([_webView isLoadingPage]) {
-		[_indicator startAnimating];
+	if ([self.webView isLoadingPage]) {
+		[self.indicatorView startAnimating];
 		reloadButton = [[UIBarButtonItem alloc]
-                        initWithImage:[UIImage imageNamed:@"stop-button.png"]
-                        landscapeImagePhone:[UIImage imageNamed:@"stop-button-mini.png"]
+                        initWithImage:[UIImage imageNamed:@"SAMWebView-stop-button"]
+                        landscapeImagePhone:[UIImage imageNamed:@"SAMWebView-stop-button-mini"]
                         style:UIBarButtonItemStylePlain
-                        target:_webView
+                        target:self.webView
                         action:@selector(stopLoading)];
 	} else {
-		[_indicator stopAnimating];
+		[self.indicatorView stopAnimating];
 		reloadButton = [[UIBarButtonItem alloc]
-                        initWithImage:[UIImage imageNamed:@"reload-button.png"]
-                        landscapeImagePhone:[UIImage imageNamed:@"reload-button-mini.png"]
+                        initWithImage:[UIImage imageNamed:@"SAMWebView-reload-button"]
+                        landscapeImagePhone:[UIImage imageNamed:@"SAMWebView-reload-button-mini"]
                         style:UIBarButtonItemStylePlain
-                        target:_webView
+                        target:self.webView
                         action:@selector(reload)];
 	}
 	
@@ -236,7 +257,7 @@
 - (void)webViewDidStartLoadingPage:(SAMWebView *)webView {
     NSURL *URL = self.currentURL;
 	self.title = URL.absoluteString;
-	[self _updateBrowserUI];
+	[self updateBrowserUI];
 
 	if (!self.toolbarHidden) {
 		[self.navigationController setToolbarHidden:[URL isFileURL] animated:YES];
@@ -245,7 +266,7 @@
 
 
 - (void)webViewDidFinishLoadingPage:(SAMWebView *)webView {
-	[self _updateBrowserUI];
+	[self updateBrowserUI];
     NSString *title = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
     if ([title length] > 0) {
         self.title = title;

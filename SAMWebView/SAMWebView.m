@@ -19,7 +19,15 @@
 
 @implementation SAMWebView
 
+@synthesize delegate = _delegate;
+@synthesize consoleEnabled = _consoleEnabled;
+@synthesize lastRequest = _lastRequest;
+@synthesize loadingPage = _loadingPage;
 @synthesize shadowsHidden = _shadowsHidden;
+@synthesize webView = _webView;
+@synthesize requestCount = _requestCount;
+@synthesize testedDOM = _testedDOM;
+
 
 #pragma mark - NSObject
 
